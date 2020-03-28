@@ -6,6 +6,58 @@ Other commands such as downloading and uploading patches and banks are not avail
 Use the below information for whatever purpose you like, remember that since Morningstar do not document this protocol it is subject to change with a firmware update without notice.
 If you republish this information it is always nice to receive credit or a link. If you have corrections or improvements, please submit a pull request. If you're building something cool, let me know!
 
+## Bank Sysex Format
+
+All lines start with the following header (all values hex)
+
+`START_BYTE, MANUFACTURER_ID_1, MANUFACTURER_ID_2, MANUFACTURER_ID_3, DEVICE_ID, VERSION_ID`
+ 
+ `F0 00 21 24 03 03` 
+
+All lines have the following footer (see below for checksum function)
+
+`[CHECKSUM, F7]`
+
+
+### Bank settings
+The first three and last lines of the bank sysex are for the bank settings
+
+1: `02 02 00 00 00 00 00 00 00 00`
+
+2: `01 11 00 00 00 00 00 00 00 00`
+
+3: `01 06 00 00 00 00 00 00 00 00 00 00` `BANK NAME (24 bytes of ASCII)`
+
+Lines 4 - 15 are for 6 x 2 pages of presets A - L respectively
+
+Line 16 - 17 are for the two expression pedal slots
+
+18: `7e 00 1c 00 00 00 00 00 00 00` (toggle states? expr states?)
+
+
+### Preset settings
+
+`01 07 00 00 00 00 00 00 00 00 01 01 00 00 02 01 01 03 00 00 05 03 02 05 06 00 06 06 03 08 09 00 08 09 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00`
+
+Preset Name: 8 bytes (starting from 0x6C)
+
+Toggle Name: 8 bytes (starting from 0x74)
+
+Long name: 24 bytes (starting from 0x7C)
+
+### Expression Settings
+
+Example
+
+`01 08 00 00 00 00 00 00 00 00 01 01 02 03 00 03 02 05 06 00 00 06 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00`
+
+Preset Name: 8 bytes (starting from 0x6C)
+
+Toggle Name: 8 bytes (starting from 0x74)
+
+Long name: 24 bytes (starting from 0x7C)
+
+
 ## Sysex Commands
 
 The format of a 'command' to the MC6 looks like this (values in hex).
