@@ -101,8 +101,8 @@ def sysex_preset(preset_config, preset_number: int):
     messages = [list(DEFAULT_MESSAGE) * 16]
 
     message_count = 0
-    if "actions" in preset_config:
-        for action in preset_config.actions:
+    if "actions" in preset_config and preset_config["actions"]:
+        for action in preset_config["actions"]:
             if not action.type:
                 raise Exception("Action does not have a action type: " + str(action))
 
@@ -122,7 +122,13 @@ def sysex_preset(preset_config, preset_number: int):
     for m in messages:
         data += m
 
-    data += [0x00, 0x00]
+    bit_field = 0
+    if "toggle_mode" in preset_config and preset_config["toggle_mode"]:
+        bit_field |= 0x08
+    if "preset_blink" in preset_config and preset_config["preset_blink"]:
+        bit_field |= 0x04
+
+    data += [bit_field, 0x00]
 
     data += sysex_text(preset_config, "name", 8, " EMPTY")
     data += sysex_text(preset_config, "toggle_name", 8, " EMPTY")

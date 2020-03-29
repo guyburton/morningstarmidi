@@ -86,15 +86,14 @@ Line 16 - 17 are for the two expression pedal slots
 
 00 preset number 1 - 12
 
-6 bytes of 00 ?
-
-toggle on/off
-blink on/off
+6 bytes of 00 padding
 
 16 lots of 6 bytes (96/0x60 bytes)
 ```
 data1 data2 data3 channel type action toggle
 ```
+
+Last 2 bytes are a 16 bit field for "toggle mode 0x0800" and "preset blink 0x0400"
 
 Preset Name: 8 bytes (starting from 0x6C)
 

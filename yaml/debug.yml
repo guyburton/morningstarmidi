@@ -5,18 +5,26 @@ bank:
       name: PRESET01
       toggle_name: TOGGLE01
       long_name: LONGNAMEFORPRESET0000001
+      toggle_mode: False
+      preset_blink: False
     B:
       name: PRESET02
       toggle_name: TOGGLE02
       long_name: LONGNAMEFORPRESET0000002
+      toggle_mode: True
+      preset_blink: False
     C:
       name: PRESET03
       toggle_name: TOGGLE03
       long_name: LONGNAMEFORPRESET0000003
+      toggle_mode: False
+      preset_blink: True
     D:
       name: PRESET04
       toggle_name: TOGGLE04
       long_name: LONGNAMEFORPRESET0000004
+      toggle_mode: True
+      preset_blink: True
     E:
       name: PRESET05
       toggle_name: TOGGLE05
