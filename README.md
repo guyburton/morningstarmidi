@@ -1,8 +1,10 @@
-# Morningstar MC6 II Programmer
+# YAML Morningstar MC6 II Programmer
 
-This project is a 3rd party programmer tool for the Morningstar MC6 mk II MIDI controller written in Python
+This project is a 3rd party programmer tool for the Morningstar MC6 mk II MIDI controller written in Python. It allows you to manage banks and presets as YAML files rather than as pure sysex data. This means you can easily review, edit, and merge changes between banks in a text editor without needing the Morningstar GUI tool or physical device present.
 
 This project is not affiliated with Morningstar in any way and has no support or warranty, official or otherwise.
+
+**This is currently in DEVELOPMENT- ie it does not fully work yet!!!!**
 
 ## How to use the tool
 
