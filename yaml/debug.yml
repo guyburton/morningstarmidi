@@ -11,7 +11,7 @@ bank:
         - type: press
           channel: 2
           program_change: 1
-        - type: press
+        - type: release
           channel: 4
           program_change: 3
         - type: long_press
@@ -40,9 +40,8 @@ bank:
           channel: 16
         - type: press
           program_change: 125
-          toggle_position: Both
+          toggle_position: both
           channel: 16
-
     C:
       name: PRESET03
       toggle_name: TOGGLE03
@@ -63,3 +62,57 @@ bank:
       name: PRESET06
       toggle_name: TOGGLE06
       long_name: LONGNAMEFORPRESET0000006
+    G:
+      name: PRESET07
+      toggle_name: TOGGLE07
+      long_name: LONGNAMEFORPRESET0000007
+    H:
+      name: PRESET08
+      toggle_name: TOGGLE08
+      long_name: LONGNAMEFORPRESET0000008
+    I:
+      name: PRESET09
+      toggle_name: TOGGLE09
+      long_name: LONGNAMEFORPRESET0000009
+    J:
+      name: PRESET10
+      toggle_name: TOGGLE10
+      long_name: LONGNAMEFORPRESET0000010
+    K:
+      name: PRESET11
+      toggle_name: TOGGLE11
+      long_name: LONGNAMEFORPRESET0000011
+    L:
+      name: PRESET12
+      toggle_name: TOGGLE12
+      long_name: LONGNAMEFORPRESET0000012
+    expression1:
+      name: EXPRESS1
+      toggle_name: EXPTOGG1
+      long_name: EXPLLLLLLLLLLLLLLLLLLLL1
+    expression2:
+      name: EXPRESS2
+      toggle_name: EXPTOGG2
+      long_name: EXPLLLLLLLLLLLLLLLLLLLL2
+      messages:
+        - expression_cc:
+            cc_number: 1
+            cc_min_value: 2
+            cc_max_value: 3
+            channel: 4
+        - cc_toe_down:
+            cc_number: 5
+            cc_value: 6
+            channel: 7
+        - cc_heel_down:
+            cc_number: 8
+            cc_value: 9
+            channel: 10
+        - toe_down_toggle_channel:
+            number: 11
+            channel1: 12
+            channel2: 13
+        - toe_down_toggle_cc:
+            number: 14
+            cc_number1: 15
+            cc_number2: 16

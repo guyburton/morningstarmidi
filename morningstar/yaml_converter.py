@@ -61,7 +61,7 @@ MESSAGE_TYPES = [
     "midi_clock_tap",
 ]
 
-expression_types = [
+EXPRESSION_TYPES = [
     "empty",
     "expression_cc",
     "cc_toe_down",
@@ -122,7 +122,8 @@ class Message:
         self.toggle_mode = 1
 
     def id(self):
-        return MESSAGE_TYPES.index(self.message_type)
+        return MESSAGE_TYPES.index(self.message_type) if self.message_type in MESSAGE_TYPES else \
+            EXPRESSION_TYPES.index(self.message_type)
 
 
 class Preset:
@@ -135,16 +136,15 @@ class Preset:
         self.toggle_mode = False
         self.blink_mode = False
         self.actions = []
-        self.is_expression = False
 
     def to_sysex(self) -> List[int]:
-        data = [0x01, 0x07, 0x00, self.id, 1 if self.is_expression else 0, 0x00, 0x00, 0x00, 0x00, 0x00]
+        data = [0x01, 0x07, 0x00, self.id, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
 
         message_count = 0
         for action in self.actions:
             for message in action.messages:
                 # this bit makes no sense but seems to work!?
-                if message.toggle_mode == "Both":
+                if message.toggle_mode == "both":
                     action_byte = action.id() * 2 + 32
                 elif message.toggle_mode == 2:
                     action_byte = (action.id() * 2 + 1)
@@ -174,28 +174,35 @@ class Preset:
         return sysex_line(data)
 
 
-class ExpressionPreset(Preset):
+class ExpressionPreset:
+
+    def __init__(self, id: int):
+        self.id = id
+        self.name = " EMPTY"
+        self.long_name = ""
+        self.toggle_name = " EMPTY"
+        self.messages = []
 
     def to_sysex(self) -> List[int]:
-        return sysex_line([0x01, 0x08, 0x00, self.id, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                          0x00,
-                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                          0x00,
-                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                          0x00,
-                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                          0x00,
-                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                          0x00,
-                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                          0x00,
-                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                          0x20,
-                          0x45, 0x58, 0x50, 0x52, 0x4e, 0x20, 0x20, 0x20, 0x45, 0x58, 0x50, 0x52, 0x4e, 0x20, 0x20,
-                          0x20,
-                          0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
-                          0x20,
-                          0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20])
+        data = [0x01, 0x08, 0x00, self.id, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
+
+        message_count = 0
+        for message in self.messages:
+            data += [message.id(), message.data1, message.data2, message.data3, 0, message.channel - 1]
+            message_count += 1
+
+        if message_count >= 16:
+            raise Exception("More than 16 messages specified for preset: " + str(self))
+
+        for i in range(message_count, 16):
+            data += [0, 0, 0, 0, 0, 0]
+
+        data += [0, 0]
+
+        data += sysex_text(self.name, 8)
+        data += sysex_text(self.toggle_name, 8)
+        data += sysex_text(self.long_name, 24)
+        return sysex_line(data)
 
 
 class Bank:
@@ -222,14 +229,16 @@ class Bank:
         for preset in self.expression_presets:
             lines.append(preset.to_sysex())
 
-        lines.append(sysex_line([0x7E, 0x00, 0x13, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 00]))
+        batch_checksum = 240
+        for line in lines:
+            batch_checksum ^= line[-2]
+        batch_checksum &= 127
+
+        lines.append(sysex_line([0x7E, 0x00, batch_checksum, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 00]))
         return lines
 
-    def get_preset(self, i: int):
-        return self.presets[i]
 
-
-def parse_message(message_type: str, default_channel, config):
+def parse_message(message_type: str, default_channel: int, config):
     message = Message()
     config_value = config[message_type]
     if message_type == 'control_change':
@@ -239,12 +248,27 @@ def parse_message(message_type: str, default_channel, config):
         message.data1 = config_value.get('number') or 0
         message.data2 = config_value.get('velocity') or 0
     elif message_type == 'sysex':
-        message.data1 = config_value[0]
+        message.data1 = config_value[0] if len(config_value) > 0 else 0
         message.data2 = config_value[1] if len(config_value) > 1 else 0
         message.data3 = config_value[2] if len(config_value) > 2 else 0
+    elif message_type == 'expression_cc':
+        message.data1 = config_value.get('cc_number') or 0
+        message.data2 = config_value.get('cc_min_value') or 0
+        message.data3 = config_value.get('cc_max_value') or 0
+    elif message_type in ['cc_toe_down', 'cc_heel_down']:
+        message.data1 = config_value.get('cc_number') or 0
+        message.data2 = config_value.get('cc_value') or 0
+    elif message_type == 'toe_down_toggle_channel':
+        message.data1 = (config_value.get('number') - 1) or 0
+        message.data2 = (config_value.get('channel1') - 1) or 0
+        message.data3 = (config_value.get('channel2') - 1) or 0
+    elif message_type == 'toe_down_toggle_cc':
+        message.data1 = (config_value.get('number') - 1) or 0
+        message.data2 = config_value.get('cc_number1') or 0
+        message.data3 = config_value.get('cc_number2') or 0
     else:
         message.data1 = config.get(message_type)
-    message.channel = config.get("channel") or default_channel
+    message.channel = config.get("channel") or config_value.get("channel") or default_channel
     message.toggle_mode = config.get("toggle_position") or 1
     message.message_type = message_type
     return message
@@ -258,8 +282,7 @@ def convert_to_bank(bank_config):
             preset_letter = chr(i + 65)
             if preset_letter in presets_config:
                 preset_config = presets_config.get(preset_letter)
-
-                preset = bank.get_preset(i)
+                preset = bank.presets[i]
                 preset.name = preset_config.get("name")
                 preset.toggle_name = preset_config.get("toggle_name")
                 preset.long_name = preset_config.get("long_name")
@@ -267,10 +290,9 @@ def convert_to_bank(bank_config):
                     preset.toggle_mode = preset_config.get("toggle_mode")
                 if "blink_mode" in preset_config:
                     preset.blink_mode = preset_config.get("blink_mode")
-
-                actions_config = preset_config.get("actions")
-                if actions_config:
-                    for action_config in actions_config:
+                messages_config = preset_config.get("actions")
+                if messages_config:
+                    for action_config in messages_config:
                         action_type = action_config.get("type")
                         if not action_type:
                             raise Exception("Action does not have a action type: " + str(action_type))
@@ -293,13 +315,27 @@ def convert_to_bank(bank_config):
                                         message = parse_message(message_type, action_config.get("channel") or 1, message_config)
                                         action.messages.append(message)
 
+        for i in range(0, NUM_EXPR_PRESETS):
+            expression_name = 'expression' + str(i + 1)
+            if expression_name in presets_config:
+                preset_config = presets_config.get(expression_name)
+                preset = bank.expression_presets[i]
+                preset.name = preset_config.get("name")
+                preset.toggle_name = preset_config.get("toggle_name")
+                preset.long_name = preset_config.get("long_name")
+                messages_config = preset_config.get("messages")
+                if messages_config:
+                    for message_config in messages_config:
+                        for message_type in EXPRESSION_TYPES:
+                            if message_type in message_config:
+                                message = parse_message(message_type, 1, message_config)
+                                preset.messages.append(message)
     return bank
 
 
 def main(yaml_file, output_file, try_send, bank):
     config = yaml.full_load(yaml_file)
     print(config)
-
     bank = convert_to_bank(config["bank"])
     data_bytes = bank.to_sysex()
     formatted_data = format_data(data_bytes)
@@ -307,12 +343,15 @@ def main(yaml_file, output_file, try_send, bank):
 
     if output_file:
         output_file.write(formatted_data)
+        output_file.write("\n")
 
     if try_send:
         port = mido.open_output('Morningstar MC6MK2')
         # do we need to send a command first to start upload?
         for b in data_bytes:
             port.send(mido.Message('sysex', data=b[1:-1]))
+
+    return data_bytes
 
 
 if __name__ == "__main__":
