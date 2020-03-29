@@ -88,10 +88,13 @@ Line 16 - 17 are for the two expression pedal slots
 
 6 bytes of 00 padding
 
-16 lots of 6 bytes (96/0x60 bytes)
+16 lots of 6 bytes, one per message (96/0x60 bytes):
+
 ```
-data1 data2 data3 channel type action toggle
+data1 data2 data3 message_type fun(action_type, toggle_pos) channel
 ```
+
+I can't quite get my head around this bit  `fun(action_type, toggle_pos)`  yet although it seems to work. The function seems to be: for toggle position 1 multiply action id * 2, for toggle position 2 multiply by 2 and add 1, for both multiply by 2 and add 32?!
 
 Last 2 bytes are a 16 bit field for "toggle mode 0x0800" and "preset blink 0x0400"
 

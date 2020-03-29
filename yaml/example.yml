@@ -9,7 +9,7 @@ banks:
         toggle_name: TOGGLE01
         long_name: LONGNAMEFORPRESET0000001
         toggle_mode: False
-        preset_blink: False
+        blink_mode: False
         actions:
           - my_action: # You can give these things a name if you desire
               comment: Some descriptive text # ignored by the sysex generator but nice for humans

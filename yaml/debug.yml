@@ -6,25 +6,55 @@ bank:
       toggle_name: TOGGLE01
       long_name: LONGNAMEFORPRESET0000001
       toggle_mode: False
-      preset_blink: False
+      blink_mode: False
+      actions:
+        - type: press
+          channel: 2
+          program_change: 1
+        - type: press
+          channel: 4
+          program_change: 3
+        - type: long_press
+          channel: 7
+          control_change:
+            number: 5
+            value: 6
+        - type: long_press_release
+          channel: 10
+          note_on:
+            number: 8
+            velocity: 9
     B:
       name: PRESET02
       toggle_name: TOGGLE02
       long_name: LONGNAMEFORPRESET0000002
       toggle_mode: True
-      preset_blink: False
+      blink_mode: False
+      actions:
+        - type: press
+          program_change: 125
+          channel: 16
+        - type: press
+          program_change: 125
+          toggle_position: 2
+          channel: 16
+        - type: press
+          program_change: 125
+          toggle_position: Both
+          channel: 16
+
     C:
       name: PRESET03
       toggle_name: TOGGLE03
       long_name: LONGNAMEFORPRESET0000003
       toggle_mode: False
-      preset_blink: True
+      blink_mode: True
     D:
       name: PRESET04
       toggle_name: TOGGLE04
       long_name: LONGNAMEFORPRESET0000004
       toggle_mode: True
-      preset_blink: True
+      blink_mode: True
     E:
       name: PRESET05
       toggle_name: TOGGLE05
