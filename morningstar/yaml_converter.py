@@ -88,7 +88,7 @@ def sysex_line(*data):
 def sysex_text(config_object, field_name: str, field_length: int, default_value=None) -> List[int]:
     data = []
     for i in range(0, field_length):
-        if field_name in config_object and i < len(config_object[field_name]):
+        if field_name in config_object and config_object[field_name] and i < len(config_object[field_name]):
             data.append(ord(config_object[field_name][i]))
         else:
             data.append(ord(default_value[i]) if default_value and i < len(default_value) else ord(' '))
@@ -143,7 +143,7 @@ def sysex_expr_preset(expression_preset_number: int) -> List[int]:
                       0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20)
 
 
-def convert_to_sysex(config):
+def convert_bank_to_sysex(config):
     lines = []
     # it's not really clear what these do yet -potentially just 'bank upload'?
     lines.append(sysex_line(0x02, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00))
@@ -154,8 +154,8 @@ def convert_to_sysex(config):
     for i in range(0, NUM_PRESETS):
         preset_letter = chr(i + 65)
         preset_config = {}
-        if "presets" in config and preset_letter in config.presets:
-            preset_config = config.presets[preset_letter]
+        if "presets" in config and config["presets"] and preset_letter in config["presets"]:
+            preset_config = config["presets"][preset_letter]
         lines.append(sysex_preset(preset_config, i))
 
     for i in range(0, NUM_EXPR_PRESETS):
@@ -178,7 +178,7 @@ def main(yaml_file, output_file, try_send, bank):
     config = yaml.full_load(yaml_file)
     print(config)
 
-    data_bytes = convert_to_sysex(config)
+    data_bytes = convert_bank_to_sysex(config["bank"])
     formatted_data = format_data(data_bytes)
     print(formatted_data)
 

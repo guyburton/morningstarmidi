@@ -1,0 +1,27 @@
+bank:
+  name: BANKNAMECANBEREALLYLOONG
+  presets:
+    A:
+      name: PRESET01
+      toggle_name: TOGGLE01
+      long_name: LONGNAMEFORPRESET0000001
+    B:
+      name: PRESET02
+      toggle_name: TOGGLE02
+      long_name: LONGNAMEFORPRESET0000002
+    C:
+      name: PRESET03
+      toggle_name: TOGGLE03
+      long_name: LONGNAMEFORPRESET0000003
+    D:
+      name: PRESET04
+      toggle_name: TOGGLE04
+      long_name: LONGNAMEFORPRESET0000004
+    E:
+      name: PRESET05
+      toggle_name: TOGGLE05
+      long_name: LONGNAMEFORPRESET0000005
+    F:
+      name: PRESET06
+      toggle_name: TOGGLE06
+      long_name: LONGNAMEFORPRESET0000006
