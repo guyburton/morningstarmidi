@@ -1,6 +1,42 @@
 # Morningstar MC6 II Programmer
 
-The Morningstar MC6 II is programmed using MIDI sysex commands for which no documentation exists. I am mainly interested in the preset and bank sysex formats, but will document all that I come to understand here. Some sysex commands such as bank up/down are replicable with MIDI CC messages according to https://morningstar-engineering.github.io/MC6-MKII-Midi-Controller/site/09-midi-implementation/
+This project is a 3rd party programmer tool for the Morningstar MC6 mk II MIDI controller written in Python
+
+This project is not affiliated with Morningstar in any way and has no support or warranty, official or otherwise.
+
+## How to use the tool
+
+I am assuming users will be familiar with Python to some degree. 
+The tool takes a custom YAML file and converts to a sysex format which can be imported with the morningstar editor.
+ 
+ 
+Usage is as follows: 
+
+```
+python ~/morningstarmidi/morningstar/yaml_converter.py -h
+usage: yaml_converter.py [-h] [-o OUTPUT] [-s SEND] [-d MIDI_DEVICE] file
+
+Generate sysex for Morningstar MC6 mk2
+
+positional arguments:
+  file                  yaml bank file
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -o OUTPUT, --output OUTPUT
+                        output as file
+  -s, --send            attempt to send directly to device
+  -d MIDI_DEVICE, --midi-device MIDI_DEVICE
+                        alternate midi device name (default is "Morningstar MC6MK2")
+  -b BANK, --bank BANK  export specific bank number
+```
+
+
+
+# Sysex Documentation
+
+The Morningstar MC6 II is programmed using MIDI sysex commands for which no documentation is made publicly available by Morningstar. 
+Some sysex commands such as bank up/down are replicable with MIDI CC messages according to https://morningstar-engineering.github.io/MC6-MKII-Midi-Controller/site/09-midi-implementation/
 Other commands such as downloading and uploading patches and banks are not available without sysex. 
 
 Use the below information for whatever purpose you like, remember that since Morningstar do not document this protocol it is subject to change with a firmware update without notice.

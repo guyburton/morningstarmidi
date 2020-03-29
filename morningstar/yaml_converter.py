@@ -174,7 +174,7 @@ def format_data(data_lines):
     return '\n'.join([format_data_line(d) for d in data_lines])
 
 
-def main(yaml_file, output_file, try_send):
+def main(yaml_file, output_file, try_send, bank):
     config = yaml.full_load(yaml_file)
     print(config)
 
@@ -198,11 +198,13 @@ if __name__ == "__main__":
                         help='yaml bank file')
     parser.add_argument('-o', '--output', type=argparse.FileType('w'),
                         help='output as file')
-    parser.add_argument('-s', '--send',
-                        help='attempt to send to device')
+    parser.add_argument('-s', '--send', action='store_true',
+                        help='attempt to send directly to device')
     parser.add_argument('-d', '--midi-device', type=str,
-                        help='alternate midi device name')
+                        help='alternate midi device name (default is "Morningstar MC6MK2")')
+    parser.add_argument('-b', '--bank', type=int,
+                        help='export specific bank number')
 
     args = vars(parser.parse_args())
 
-    main(args["file"], args["output"], args["send"])
+    main(args["file"], args["output"], args["send"], args["bank"])
