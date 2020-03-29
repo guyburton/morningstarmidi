@@ -2,14 +2,6 @@ import unittest
 from morningstar import yaml_converter
 
 
-def format_data_line(data):
-    return " ".join(["{:02x}".format(b).upper() for b in data])
-
-
-def format_data(data_lines):
-    return '\n'.join([format_data_line(d) for d in data_lines])
-
-
 class TestYamlConverter(unittest.TestCase):
 
     def test_blank_bank(self):
@@ -21,7 +13,7 @@ class TestYamlConverter(unittest.TestCase):
             }
         }
         data = yaml_converter.convert_to_sysex(blank_bank)
-        print(format_data(data))
+        print(yaml_converter.format_data(data))
 
         self.assertEqual(data[0x00], [0xF0, 0x00, 0x21, 0x24, 0x03, 0x03, 0x02, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x75, 0xF7])
         self.assertEqual(data[0x01], [0xF0, 0x00, 0x21, 0x24, 0x03, 0x03, 0x01, 0x11, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x65, 0xF7])
