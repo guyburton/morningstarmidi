@@ -24,6 +24,22 @@ bank:
           note_on:
             number: 8
             velocity: 9
+        - type: release_all
+          realtime: start
+        - type: double_tap
+          midi_clock:
+            bpm: 250
+            tap_menu: True
+        - type: double_tap_release
+          midi_clock_tap: True
+        - type: long_double_tap
+          channel: 3
+          pc_scroll_up:
+            slot: 15
+            lower_limit: 1
+            upper_limit: 2
+            increment: True
+
     B:
       name: PRESET02
       toggle_name: TOGGLE02

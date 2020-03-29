@@ -1,8 +1,9 @@
 #!/usr/bin/python
 import argparse
-from typing import List
+from typing import List, Dict
 
 import yaml
+from math import floor
 
 from morningstar.checksum import add_checksum_footer
 
@@ -40,7 +41,7 @@ MESSAGE_TYPES = [
     "control_change",
     "note_on",
     "note_off",
-    "real_time",
+    "realtime",
     "sysex",
     "midi_clock",
     "pc_scroll_up",
@@ -50,13 +51,14 @@ MESSAGE_TYPES = [
     "device_bank_change_mode",
     "device_set_bank",
     "device_toggle_page",
-    "device_toggle_preset",
+    "device_set_toggle",
     "device_set_midi_thru",
     "device_select_expression_pedal_message",
     "device_looper_mode",
     "strymon_bank_up",
     "strymon_bank_down",
     "axefx_tuner",
+    "toggle_preset",
     "delay",
     "midi_clock_tap",
 ]
@@ -251,6 +253,19 @@ def parse_message(message_type: str, default_channel: int, config):
         message.data1 = config_value[0] if len(config_value) > 0 else 0
         message.data2 = config_value[1] if len(config_value) > 1 else 0
         message.data3 = config_value[2] if len(config_value) > 2 else 0
+    elif message_type == 'realtime':
+        message.data1 = ['nothing', 'start', 'stop', 'continue'].index(config_value)
+    elif message_type == 'midi_clock':
+        message.data1 = floor(config_value.get('bpm') / 100)
+        message.data2 = config_value.get('bpm') - (100 * message.data1)
+        message.data3 = config_value.get("tap_menu") or 0
+    elif message_type == 'midi_clock_tap':
+        pass
+    elif message_type == 'pc_scroll_up':
+        message.data1 = (config_value.get('slot') - 1) + 16 if config_value.get("increment") else 0
+        message.data2 = config_value.get('lower_limit') or 0
+        message.data3 = config_value.get('upper_limit') or 0
+        pass
     elif message_type == 'expression_cc':
         message.data1 = config_value.get('cc_number') or 0
         message.data2 = config_value.get('cc_min_value') or 0
@@ -268,7 +283,7 @@ def parse_message(message_type: str, default_channel: int, config):
         message.data3 = config_value.get('cc_number2') or 0
     else:
         message.data1 = config.get(message_type)
-    message.channel = config.get("channel") or config_value.get("channel") or default_channel
+    message.channel = config.get("channel") or (isinstance(config_value, dict) and config_value.get("channel")) or default_channel
     message.toggle_mode = config.get("toggle_position") or 1
     message.message_type = message_type
     return message
@@ -295,7 +310,7 @@ def convert_to_bank(bank_config):
                     for action_config in messages_config:
                         action_type = action_config.get("type")
                         if not action_type:
-                            raise Exception("Action does not have a action type: " + str(action_type))
+                            raise Exception("Action does not have a action type: " + str(action_config))
                         if action_type not in ACTIONS:
                             raise Exception("Unknown action type: " + action_type)
 
