@@ -1,6 +1,6 @@
 #!/usr/bin/python
 import sys
-from checksum import checksum
+from morningstar.checksum import add_checksum_footer
 
 can_send = False
 try:
@@ -11,20 +11,14 @@ except ImportError:
 
 
 def main(argv, input_is_hex, try_send):
-    function_val_1 = int(argv[0], 16 if input_is_hex else 10)
-    function_val_2 = int(argv[1], 16 if input_is_hex else 10)
-
     data_bytes = [0xF0, 0x00, 0x21, 0x24, 0x00, 0x00]
-    data_bytes.append(function_val_1)
-    data_bytes.append(function_val_2)
-    data_bytes.append(0x00)
-    data_bytes.append(0x00)
-    data_bytes.append(0x00)
-    data_bytes.append(0x00)
-    data_bytes.append(0x00)
-    data_bytes.append(0x00)
-    data_bytes.append(checksum(data_bytes))
-    data_bytes.append(0xF7)
+    for i in range(0, 8):
+        if i < len(argv):
+            data_bytes.append(int(argv[i], 16 if input_is_hex else 10))
+        else:
+            data_bytes.append(0)
+
+    add_checksum_footer(data_bytes)
 
     print(" ".join(["{:02x}".format(b) for b in data_bytes]).upper())
 

@@ -13,37 +13,99 @@ All lines start with the following header (all values hex)
 `START_BYTE, MANUFACTURER_ID_1, MANUFACTURER_ID_2, MANUFACTURER_ID_3, DEVICE_ID, VERSION_ID`
  
  `F0 00 21 24 03 03` 
+ 
+### Device IDs
 
-All lines have the following footer (see below for checksum function)
+MC 6 (presume mk ii) ID 3
+MC8 ID 4
+
+All lines have the following footer (see sysex function section for checksum function)
 
 `[CHECKSUM, F7]`
 
-
 ### Bank settings
+
 The first three and last lines of the bank sysex are for the bank settings
 
 1: `02 02 00 00 00 00 00 00 00 00`
 
 2: `01 11 00 00 00 00 00 00 00 00`
 
-3: `01 06 00 00 00 00 00 00 00 00 00 00` `BANK NAME (24 bytes of ASCII)`
+3: `01 06 00 00 00 00 00 00 00 00 00 00` + `BANK NAME (24 bytes of ASCII padded with 0)`
 
 Lines 4 - 15 are for 6 x 2 pages of presets A - L respectively
 
 Line 16 - 17 are for the two expression pedal slots
 
-18: `7e 00 1c 00 00 00 00 00 00 00` (toggle states? expr states?)
+18: `7e 00 1c 00 00 00 00 00 00 00` (toggle states? expr states? bank clear ?)
 
 
 ### Preset settings
 
 `01 07 00 00 00 00 00 00 00 00 01 01 00 00 02 01 01 03 00 00 05 03 02 05 06 00 06 06 03 08 09 00 08 09 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00`
 
+01 07 00 looks like line header
+
+00 preset number 1 - 12
+
+6 bytes of 00 ?
+
+toggle on/off
+blink on/off
+
+16 lots of 6 bytes (96/0x60 bytes)
+```
+data1 data2 data3 channel type action toggle
+```
+
 Preset Name: 8 bytes (starting from 0x6C)
 
 Toggle Name: 8 bytes (starting from 0x74)
 
 Long name: 24 bytes (starting from 0x7C)
+
+#### Preset Action Types
+```
+00: No action
+01: Press
+02: Release
+03: Long Press
+04: Long Press Release
+05: Double Tap
+06: Double Tap Release
+07: Long Double Tap
+08: Long Double Tap Release
+09: Release All
+```
+
+### Preset MIDI Messages
+
+```
+00: Empty
+01: Program Change
+02: Control Change
+03: Note On
+04: Note off
+05: Real time
+06: SysEx
+07: Midi Clock
+08: PC Scroll Up
+09: PC Scroll Down
+10: Device Bank Up
+11: Device Bank Down
+12: Device Bank Change Mode
+13: Device Set Bank
+14: Device Toggle Page
+15: Device Toggle Preset
+16: Device Set Midi thru
+17: Device Select Expression Pedal message
+18: Device Looper Mode
+19: Strymon Bank Up
+20: Strymon Bank Down
+21: AxeFX Tuner
+23: Delay
+24: Midi Clock Tap
+```
 
 ### Expression Settings
 
@@ -56,6 +118,17 @@ Preset Name: 8 bytes (starting from 0x6C)
 Toggle Name: 8 bytes (starting from 0x74)
 
 Long name: 24 bytes (starting from 0x7C)
+
+#### Expression Action Types
+
+```
+0: Empty
+1: Expression CC
+2: CC Toe Down
+3: CC Heel Down
+4: Toe Down Toggle Channel
+5: Toe Down Toggle CC
+```
 
 
 ## Sysex Commands
@@ -101,7 +174,21 @@ Default all values to 0
 
 `F0 00 21 24 00 00 00 22 00 00 00 00 00 00 57 F7`  Toggle Preset (0 34)
 
+`F0 00 21 24 00 00 10 01 00 00 00 00 00 00 64 F7`  Dump All (16 1)
+
+`F0 00 21 24 00 00 10 02 00 00 00 00 00 00 67 F7`  Dump Bank (16 2)
+
+`F0 00 21 24 00 00 03 00 00 00 00 00 00 00 76 F7`  Send Next (3 0 BANK NUMBER, PRESET NUMBER, IS EXPRESSION) (3 23 also appears to do something)
+
+`F0 00 21 24 00 00 03 00 01 01 00 00 00 00 76 F7`
+
+`F0 00 21 24 00 00 03 00 01 02 00 00 00 00 75 F7`
+
+`F0 00 21 24 00 00 03 00 01 03 00 00 00 00 74 F7`
+
 `F0 00 21 24 00 00 00 7D 00 00 00 00 00 00 08 F7`  Ping (0 125)
+
+`F0 00 21 24 00 00 00 7F 00 00 00 00 00 00 0A F7`  Acknowledge (0 127)
 
 
 

@@ -1,6 +1,6 @@
 #!/usr/bin/python
 import sys
-
+from typing import List
 
 def main(argv):
     databytes = parseArgs(argv)
@@ -20,11 +20,17 @@ def parseArgs(argv):
     return databytes
 
 
-def checksum(bytes):
+def checksum(bytes: List[int]) -> int:
     x = 0
     for y in bytes:
         x ^= y
     return x & 127
+
+
+def add_checksum_footer(bytes: List[int]) -> List[int]:
+    bytes.append(checksum(bytes))
+    bytes.append(0xF7)
+    return bytes
 
 
 if __name__ == "__main__":
