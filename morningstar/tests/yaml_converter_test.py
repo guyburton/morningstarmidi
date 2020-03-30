@@ -1,5 +1,6 @@
 import unittest
 from morningstar import yaml_converter
+import os
 
 
 class TestYamlConverter(unittest.TestCase):
@@ -295,7 +296,7 @@ class TestYamlConverter(unittest.TestCase):
             with open('../output.syx', 'w') as output_file:
                 yaml_converter.main(input_file, output_file, False, 0)
 
-        with open('../banks/debug.syx', 'r') as expectationfile:
+        with open(os.path.dirname(__file__) + '/debug.syx', 'r') as expectationfile:
             expectation = expectationfile.readlines()
         with open('../output.syx', 'r') as actualfile:
             actual = actualfile.readlines()

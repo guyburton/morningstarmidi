@@ -241,7 +241,7 @@ class Bank:
         return lines
 
 
-def parse_expr_message(message_type: str, default_channel: int, config) -> Message:
+def parse_expression_message(message_type: str, default_channel: int, config) -> Message:
     message = Message()
     config_value = config[message_type]
     if message_type == 'expression_cc':
@@ -262,9 +262,10 @@ def parse_expr_message(message_type: str, default_channel: int, config) -> Messa
     else:
         message.data1 = config.get(message_type)
 
-    if isinstance(config_value, dict):
-        message.channel = config_value.get("channel")
-    message.channel = message.channel or config.get("channel") or default_channel
+    if isinstance(config_value, dict) and config_value.get("channel"):
+        message.channel = config_value["channel"]
+    else:
+        message.channel = config.get("channel") or default_channel
     message.message_type = message_type
     return message
 
@@ -287,7 +288,7 @@ def parse_message(message_type: str, default_channel: int, config) -> Message:
     elif message_type == 'midi_clock':
         message.data1 = floor(config_value.get('bpm') / 100)
         message.data2 = config_value.get('bpm') - (100 * message.data1)
-        message.data3 = config_value.get("tap_menu") or 0
+        message.data3 = 1 if config_value.get("tap_menu") else 0
     elif message_type == 'midi_clock_tap':
         pass
     elif message_type == 'pc_scroll_up':
@@ -297,7 +298,10 @@ def parse_message(message_type: str, default_channel: int, config) -> Message:
         pass
     else:
         message.data1 = config.get(message_type)
-    message.channel = config.get("channel") or default_channel
+    if isinstance(config_value, dict) and config_value.get("channel"):
+        message.channel = config_value["channel"]
+    else:
+        message.channel = config.get("channel") or default_channel
     message.toggle_mode = config.get("toggle_position") or 1
     message.message_type = message_type
     return message
@@ -359,7 +363,7 @@ def convert_to_bank(bank_config):  # noqa: C901
                     for message_config in messages_config:
                         for message_type in EXPRESSION_TYPES:
                             if message_type in message_config:
-                                message = parse_message(message_type, 1, message_config)
+                                message = parse_expression_message(message_type, 1, message_config)
                                 preset.messages.append(message)
     return bank
 

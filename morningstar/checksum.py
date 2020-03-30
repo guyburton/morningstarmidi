@@ -20,6 +20,8 @@ def main(argv):
 def checksum(bytes: List[int]) -> int:
     x = 0
     for y in bytes:
+        if type(y) is not int:
+            raise Exception("Bad data input to checksum: " + str(bytes))
         x ^= y
     return x & 127
 
