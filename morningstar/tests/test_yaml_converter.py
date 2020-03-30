@@ -292,13 +292,13 @@ class TestYamlConverter(unittest.TestCase):
         self.assertEqual(data[0x03][0x70], 0x04)
 
     def test_debug_yaml_matches_sysex(self):
-        with open('../yaml/debug.yml', 'r') as input_file:
-            with open('../output.syx', 'w') as output_file:
+        with open(os.path.dirname(__file__) + '/../../yaml/debug.yml', 'r') as input_file:
+            with open('output.syx', 'w') as output_file:
                 yaml_converter.main(input_file, output_file, False, 0)
 
         with open(os.path.dirname(__file__) + '/debug.syx', 'r') as expectationfile:
             expectation = expectationfile.readlines()
-        with open('../output.syx', 'r') as actualfile:
+        with open('output.syx', 'r') as actualfile:
             actual = actualfile.readlines()
 
         for i, line in enumerate(expectation):

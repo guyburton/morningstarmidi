@@ -180,9 +180,9 @@ class ExpressionPreset:
 
     def __init__(self, id: int):
         self.id = id
-        self.name = " EMPTY"
+        self.name = " EXPRN"
         self.long_name = ""
-        self.toggle_name = " EMPTY"
+        self.toggle_name = " EXPRN"
         self.messages = []
 
     def to_sysex(self) -> List[int]:
