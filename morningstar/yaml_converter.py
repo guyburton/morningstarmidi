@@ -4,6 +4,7 @@ from typing import List
 
 import yaml
 from math import floor
+import os
 
 from morningstar.checksum import add_checksum_footer
 
@@ -389,11 +390,17 @@ def main(yaml_file, output_file, try_send, bank):
     return data_bytes
 
 
+def process_file(inputfilename, outputfilename, args):
+    with open(inputfilename, 'r') as inputfile:
+        with open(outputfilename, 'w') as outputfile:
+            main(inputfile, outputfile, args["send"], args["bank"])
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Generate sysex for Morningstar MC6 mk2')
-    parser.add_argument('file', type=argparse.FileType('r'),
+    parser.add_argument('file', type=str,
                         help='yaml bank file')
-    parser.add_argument('-o', '--output', type=argparse.FileType('w'),
+    parser.add_argument('-o', '--output', type=str,
                         help='output as file')
     parser.add_argument('-s', '--send', action='store_true',
                         help='attempt to send directly to device')
@@ -404,4 +411,20 @@ if __name__ == "__main__":
 
     args = vars(parser.parse_args())
 
-    main(args["file"], args["output"], args["send"], args["bank"])
+    if os.path.isdir(args["file"]):
+        files = os.listdir(args["file"])
+        if args["output"] and not os.path.isdir(args["output"]):
+            print("Input file is a directory, but output file is not")
+            exit(2)
+
+        for inputfilename in files:
+            if '.yml' not in inputfilename:
+                continue
+            outputfilename = inputfilename.replace('.yml', '.syx')
+
+            process_file(
+                os.path.join(args["file"], inputfilename),
+                os.path.join(args["output"], outputfilename),
+                args)
+    else:
+        process_file(args["file"], args["output"], args)

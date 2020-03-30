@@ -1,72 +1,71 @@
-banks:
- - bank:
-    id: 1 # this is optional, forcing this bank to a particular slot id. Without specifying it banks will be assigned to the 'next' bank after the previous assigned from this file.
-    name: BANK01WITHREALLYLONGNAME
-    preset_toggle_clear_mode: False
-    presets:
-      - A:
-        name: PRESET01
-        toggle_name: TOGGLE01
-        long_name: LONGNAMEFORPRESET0000001
-        toggle_mode: False
-        blink_mode: False
-        actions:
-          - my_action: # You can give these things a name if you desire
-              comment: Some descriptive text # ignored by the sysex generator but nice for humans
-              # don't worry about assigning message ids. We'll generate an error if we go over 16.
-              type: press  # group together all messages for a given action/toggle state/midi channel, more concise this way
-              toggle_position: 1
-              channel: 1 # defaults to channel 1, no need to specify
-              messages: # can specify multiple
-                - program_change: 11
-                - control_change:
-                    number: 31
-                    value: 127
-                - note_on:
-                    note: 50
-                    velocity: 127
-                - note_off:
-                    note: 50
-                    velocity: 127
-                - real_time: Start
-                - sysex:
-                  - 0x01
-                  - 0x02
-                  - 0x03
-                - midi_clock:
-                    bpm: 100
-                    show_tap_menu: no
-                - pc_scroll:
-                    direction: up
-                    slot: 1
-                    lower_limit: 1
-                    upper_limit: 16
-                    increment: True
-                - midi_clock_tap: True
-                - bank_up: True
-                - bank_down: True
-                - bank_change_mode: True
-                - set_bank:
-                    bank_number: 3
-                    goto_last_used: True
-                - toggle_page: True
-                - toggle_preset: True
-                - set_preset_toggle:
-                    toggle_position: True
-                    presets:
-                      - A
-                      - B
-                      - C
-                - set_midi_thru: True
-                - select_expression_message:
-                    expression_input: 1
-                    messages: # slightly dicey because we are automatically assigning message ids
-                      - 1
-                      - 2
-                - looper_mode: False
-                - delay: 200
-                - strymon_bank: up
-                - axe_fx_tuner: True
+bank:
+  id: 1 # this is optional, forcing this bank to a particular slot id. Without specifying it banks will be assigned to the 'next' bank after the previous assigned from this file.
+  name: BANK01WITHREALLYLONGNAME
+  preset_toggle_clear_mode: False
+  presets:
+    - A:
+      name: PRESET01
+      toggle_name: TOGGLE01
+      long_name: LONGNAMEFORPRESET0000001
+      toggle_mode: False
+      blink_mode: False
+      actions:
+        - my_action: # You can give these things a name if you desire
+            comment: Some descriptive text # ignored by the sysex generator but nice for humans
+            # don't worry about assigning message ids. We'll generate an error if we go over 16.
+            type: press  # group together all messages for a given action/toggle state/midi channel, more concise this way
+            toggle_position: 1
+            channel: 1 # defaults to channel 1, no need to specify
+            messages: # can specify multiple
+              - program_change: 11
+              - control_change:
+                  number: 31
+                  value: 127
+              - note_on:
+                  note: 50
+                  velocity: 127
+              - note_off:
+                  note: 50
+                  velocity: 127
+              - real_time: Start
+              - sysex:
+                - 0x01
+                - 0x02
+                - 0x03
+              - midi_clock:
+                  bpm: 100
+                  show_tap_menu: no
+              - pc_scroll:
+                  direction: up
+                  slot: 1
+                  lower_limit: 1
+                  upper_limit: 16
+                  increment: True
+              - midi_clock_tap: True
+              - bank_up: True
+              - bank_down: True
+              - bank_change_mode: True
+              - set_bank:
+                  bank_number: 3
+                  goto_last_used: True
+              - toggle_page: True
+              - toggle_preset: True
+              - set_preset_toggle:
+                  toggle_position: True
+                  presets:
+                    - A
+                    - B
+                    - C
+              - set_midi_thru: True
+              - select_expression_message:
+                  expression_input: 1
+                  messages: # slightly dicey because we are automatically assigning message ids
+                    - 1
+                    - 2
+              - looper_mode: False
+              - delay: 200
+              - strymon_bank: up
+              - axe_fx_tuner: True
 
 
 
