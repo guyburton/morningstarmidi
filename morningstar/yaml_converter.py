@@ -1,6 +1,6 @@
 #!/usr/bin/python
 import argparse
-from typing import List, Dict
+from typing import List
 
 import yaml
 from math import floor
@@ -223,7 +223,8 @@ class Bank:
         # it's not really clear what these do yet -potentially just 'bank upload'?
         lines.append(sysex_line([0x02, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]))
         lines.append(sysex_line([0x01, 0x11, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]))
-        lines.append(sysex_line([0x01, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00] + sysex_text(self.name, 24)))
+        lines.append(sysex_line([0x01, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00] +
+                                sysex_text(self.name, 24)))
 
         for preset in self.presets:
             lines.append(preset.to_sysex())
@@ -240,7 +241,35 @@ class Bank:
         return lines
 
 
-def parse_message(message_type: str, default_channel: int, config):
+def parse_expr_message(message_type: str, default_channel: int, config) -> Message:
+    message = Message()
+    config_value = config[message_type]
+    if message_type == 'expression_cc':
+        message.data1 = config_value.get('cc_number') or 0
+        message.data2 = config_value.get('cc_min_value') or 0
+        message.data3 = config_value.get('cc_max_value') or 0
+    elif message_type in ['cc_toe_down', 'cc_heel_down']:
+        message.data1 = config_value.get('cc_number') or 0
+        message.data2 = config_value.get('cc_value') or 0
+    elif message_type == 'toe_down_toggle_channel':
+        message.data1 = (config_value.get('number') - 1) or 0
+        message.data2 = (config_value.get('channel1') - 1) or 0
+        message.data3 = (config_value.get('channel2') - 1) or 0
+    elif message_type == 'toe_down_toggle_cc':
+        message.data1 = (config_value.get('number') - 1) or 0
+        message.data2 = config_value.get('cc_number1') or 0
+        message.data3 = config_value.get('cc_number2') or 0
+    else:
+        message.data1 = config.get(message_type)
+
+    if isinstance(config_value, dict):
+        message.channel = config_value.get("channel")
+    message.channel = message.channel or config.get("channel") or default_channel
+    message.message_type = message_type
+    return message
+
+
+def parse_message(message_type: str, default_channel: int, config) -> Message:
     message = Message()
     config_value = config[message_type]
     if message_type == 'control_change':
@@ -266,30 +295,15 @@ def parse_message(message_type: str, default_channel: int, config):
         message.data2 = config_value.get('lower_limit') or 0
         message.data3 = config_value.get('upper_limit') or 0
         pass
-    elif message_type == 'expression_cc':
-        message.data1 = config_value.get('cc_number') or 0
-        message.data2 = config_value.get('cc_min_value') or 0
-        message.data3 = config_value.get('cc_max_value') or 0
-    elif message_type in ['cc_toe_down', 'cc_heel_down']:
-        message.data1 = config_value.get('cc_number') or 0
-        message.data2 = config_value.get('cc_value') or 0
-    elif message_type == 'toe_down_toggle_channel':
-        message.data1 = (config_value.get('number') - 1) or 0
-        message.data2 = (config_value.get('channel1') - 1) or 0
-        message.data3 = (config_value.get('channel2') - 1) or 0
-    elif message_type == 'toe_down_toggle_cc':
-        message.data1 = (config_value.get('number') - 1) or 0
-        message.data2 = config_value.get('cc_number1') or 0
-        message.data3 = config_value.get('cc_number2') or 0
     else:
         message.data1 = config.get(message_type)
-    message.channel = config.get("channel") or (isinstance(config_value, dict) and config_value.get("channel")) or default_channel
+    message.channel = config.get("channel") or default_channel
     message.toggle_mode = config.get("toggle_position") or 1
     message.message_type = message_type
     return message
 
 
-def convert_to_bank(bank_config):
+def convert_to_bank(bank_config):  # noqa: C901
     bank = Bank(bank_config.get("name"))
     presets_config = bank_config.get("presets")
     if presets_config:
@@ -327,7 +341,9 @@ def convert_to_bank(bank_config):
                             for message_config in messages_config:
                                 for message_type in MESSAGE_TYPES:
                                     if message_type in message_config:
-                                        message = parse_message(message_type, action_config.get("channel") or 1, message_config)
+                                        message = parse_message(message_type,
+                                                                action_config.get("channel") or 1,
+                                                                message_config)
                                         action.messages.append(message)
 
         for i in range(0, NUM_EXPR_PRESETS):
