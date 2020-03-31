@@ -45,7 +45,7 @@ def process_file(input_filename):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Generate sysex for Morningstar MC6 mk2')
+    parser = argparse.ArgumentParser(description='Generate YAML from Morningstar MC6 mk2 sysex dump')
     parser.add_argument('file', type=str,
                         help='sysex file')
     parser.add_argument('-o', '--output', type=str,

@@ -62,6 +62,11 @@ class Action:
     def id(self):
         return ACTIONS.index(self.action_type)
 
+    def to_dict(self):
+        return {
+            "type": self.action_type
+        }
+
 
 class Message:
 
@@ -135,7 +140,7 @@ class Preset:
             "long_name": self.long_name,
             "toggle_mode": self.toggle_mode,
             "blink_mode": self.blink_mode,
-            "actions": []
+            "actions": [action.to_dict for action in self.actions]
         }
 
         return data

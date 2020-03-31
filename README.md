@@ -15,7 +15,6 @@ The tool takes a custom YAML file and converts to a sysex format which can be im
 Usage is as follows: 
 
 ```
-python ~/morningstarmidi/morningstar/yaml_converter.py -h
 usage: yaml_converter.py [-h] [-o OUTPUT] [-s SEND] [-d MIDI_DEVICE] file
 
 Generate sysex for Morningstar MC6 mk2
@@ -31,6 +30,19 @@ optional arguments:
   -d MIDI_DEVICE, --midi-device MIDI_DEVICE
                         alternate midi device name (default is "Morningstar MC6MK2")
   -b BANK, --bank BANK  export specific bank number
+```
+```
+usage: sysex_converter.py [-h] [-o OUTPUT] file
+
+Generate YAML from Morningstar MC6 mk2 sysex dump
+
+positional arguments:
+  file                  sysex file
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -o OUTPUT, --output OUTPUT
+                        output as file
 ```
 
 
