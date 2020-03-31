@@ -1,6 +1,9 @@
-import unittest
-from morningstar import yaml_converter
 import os
+import unittest
+
+import morningstar.model
+import morningstar.utils
+from morningstar import yaml_converter
 
 
 class TestYamlConverter(unittest.TestCase):
@@ -12,7 +15,7 @@ class TestYamlConverter(unittest.TestCase):
             'presets': None
         }
         data = yaml_converter.convert_to_bank(blank_bank).to_sysex()
-        print(yaml_converter.format_data(data))
+        print(morningstar.utils.format_data(data))
 
         self.assertEqual(data[0x00],
                          [0xF0, 0x00, 0x21, 0x24, 0x03, 0x03, 0x02, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
