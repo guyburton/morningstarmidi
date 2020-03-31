@@ -41,7 +41,9 @@ def process_file(input_filename):
             elif 4 <= count <= 3 + NUM_PRESETS:
                 read_preset(bank.presets[count - 4], data_bytes)
 
-        return yaml.dump(bank.to_dict())
+        return yaml.dump({
+            "bank": bank.to_dict()
+        })
 
 
 if __name__ == "__main__":
