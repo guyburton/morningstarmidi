@@ -2,6 +2,7 @@
 import argparse
 import os
 from math import floor
+from typing import List
 
 import yaml
 
@@ -138,7 +139,7 @@ def convert_to_bank(bank_config):  # noqa: C901
     return bank
 
 
-def main(yaml_file, output_file, try_send, bank):
+def main(yaml_file, output_file=None, try_send=False, bank=None) -> List[List[int]]:
     config = yaml.full_load(yaml_file)
     print(config)
     bank = convert_to_bank(config["bank"])

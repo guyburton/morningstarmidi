@@ -20,7 +20,7 @@ def format_data_line(data: List[int]) -> str:
     return " ".join(["{:02x}".format(b).upper() for b in data])
 
 
-def format_data(data_lines: List[int]) -> str:
+def format_data(data_lines: List[List[int]]) -> str:
     return '\n'.join([format_data_line(d) for d in data_lines])
 
 
