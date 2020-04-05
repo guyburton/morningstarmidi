@@ -1,14 +1,14 @@
 bank:
   id: 1 # this is optional, forcing this bank to a particular slot id. Without specifying it banks will be assigned to the 'next' bank after the previous assigned from this file.
   name: BANK01WITHREALLYLONGNAME
-  preset_toggle_clear_mode: False
+  preset_toggle_clear_mode: false
   presets:
     - A:
       name: PRESET01
       toggle_name: TOGGLE01
       long_name: LONGNAMEFORPRESET0000001
-      toggle_mode: False
-      blink_mode: False
+      toggle_mode: false
+      blink_mode: false
       actions:
         - my_action: # You can give these things a name if you desire
             comment: Some descriptive text # ignored by the sysex generator but nice for humans
@@ -40,32 +40,32 @@ bank:
                   slot: 1
                   lower_limit: 1
                   upper_limit: 16
-                  increment: True
-              - midi_clock_tap: True
-              - bank_up: True
-              - bank_down: True
-              - bank_change_mode: True
+                  increment: true
+              - midi_clock_tap: true
+              - bank_up: true
+              - bank_down: true
+              - bank_change_mode: true
               - set_bank:
                   bank_number: 3
-                  goto_last_used: True
-              - toggle_page: True
-              - toggle_preset: True
+                  goto_last_used: true
+              - toggle_page: true
+              - toggle_preset: true
               - set_preset_toggle:
-                  toggle_position: True
+                  toggle_position: true
                   presets:
                     - A
                     - B
                     - C
-              - set_midi_thru: True
+              - set_midi_thru: true
               - select_expression_message:
                   expression_input: 1
                   messages: # slightly dicey because we are automatically assigning message ids
                     - 1
                     - 2
-              - looper_mode: False
+              - looper_mode: false
               - delay: 200
               - strymon_bank: up
-              - axe_fx_tuner: True
+              - axe_fx_tuner: true
 
 
 

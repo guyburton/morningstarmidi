@@ -5,8 +5,8 @@ bank:
       name: PRESET01
       toggle_name: TOGGLE01
       long_name: LONGNAMEFORPRESET0000001
-      toggle_mode: False
-      blink_mode: False
+      toggle_mode: false
+      blink_mode: false
       actions:
         - type: press
           channel: 2
@@ -29,23 +29,23 @@ bank:
         - type: double_tap
           midi_clock:
             bpm: 250
-            tap_menu: True
+            tap_menu: true
         - type: double_tap_release
-          midi_clock_tap: True
+          midi_clock_tap: true
         - type: long_double_tap
           channel: 3
           pc_scroll_up:
             slot: 15
             lower_limit: 1
             upper_limit: 2
-            increment: True
+            increment: true
 
     B:
       name: PRESET02
       toggle_name: TOGGLE02
       long_name: LONGNAMEFORPRESET0000002
-      toggle_mode: True
-      blink_mode: False
+      toggle_mode: true
+      blink_mode: false
       actions:
         - type: press
           program_change: 125
@@ -62,14 +62,14 @@ bank:
       name: PRESET03
       toggle_name: TOGGLE03
       long_name: LONGNAMEFORPRESET0000003
-      toggle_mode: False
-      blink_mode: True
+      toggle_mode: false
+      blink_mode: true
     D:
       name: PRESET04
       toggle_name: TOGGLE04
       long_name: LONGNAMEFORPRESET0000004
-      toggle_mode: True
-      blink_mode: True
+      toggle_mode: true
+      blink_mode: true
     E:
       name: PRESET05
       toggle_name: TOGGLE05
