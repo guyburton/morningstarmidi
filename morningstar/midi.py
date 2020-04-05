@@ -8,6 +8,10 @@ try:
     ports = mido.get_output_names()
     if device_name not in ports:
         print("Available ports: " + ", ".join(ports))
+    for port in ports:
+        if port.startswith(device_name):
+            device_name = port
+            break
 
 except ImportError:
     print("Could not load module mido- run 'pip install mido' if you wish to send midi commands directly")
