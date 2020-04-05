@@ -1,13 +1,9 @@
 #!/usr/bin/python
+import argparse
 import sys
-from morningstar.checksum import add_checksum_footer
 
-can_send = False
-try:
-    import mido
-    can_send = True
-except ImportError:
-    print("Could not load module mido- run 'pip install mido' if you wish to send midi commands directly")
+import morningstar.midi
+from morningstar.checksum import add_checksum_footer
 
 
 def main(argv, input_is_hex, try_send):
@@ -23,23 +19,25 @@ def main(argv, input_is_hex, try_send):
     print(" ".join(["{:02x}".format(b) for b in data_bytes]).upper())
 
     if try_send:
-        port = mido.open_output('Morningstar MC6MK2')
-        port.send(mido.Message('sysex', data=data_bytes[1:-1]))
+        morningstar.midi.send(data_bytes)
 
 
 if __name__ == "__main__":
     args = sys.argv[1:]
-    if len(args) < 2:
-        print("Usage:")
-        print("\t-h input as hex (else decimal)")
-        print("\t-s try and send command to device")
-        print("\tspace or comma delimited args [function byte 1, function byte 2]")
-        exit(0)
+    parser = argparse.ArgumentParser(description='Generate sysex for Morningstar MC6 mk2')
+    parser.add_argument('-s', '--send', action='store_true',
+                        help='attempt to send directly to device')
+    parser.add_argument('-x', '--hex', action='store_true',
+                        help='input as hex (rather than decimal)')
+    parser.add_argument('-d', '--midi-device', dest='device', type=str,
+                        help='alternate midi device name (default is "Morningstar MC6MK2")')
+    parser.add_argument('data', type=str, nargs='*', help='space or comma delimited args [function byte 1, function byte 2]')
 
-    is_hex = '-h' in args
-    try_send = '-s' in args
-    if is_hex:
-        args.remove('-h')
-    if try_send:
-        args.remove('-s')
-    main(args, is_hex, try_send)
+    args = vars(parser.parse_args())
+
+    is_hex = args['hex']
+    try_send = args['send']
+    if args["device"]:
+        morningstar.midi.device_name = args["device"]
+
+    main(args["data"], is_hex, try_send)
