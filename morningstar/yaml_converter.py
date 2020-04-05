@@ -104,7 +104,7 @@ def convert_to_bank(bank_config):  # noqa: C901
 
 
 def main(yaml_file, output_file=None, try_send=False, bank=None) -> List[List[int]]:
-    config = yaml.full_load(yaml_file)
+    config = yaml.safe_load(yaml_file)
     print(config)
     bank = convert_to_bank(config["bank"])
     data_bytes = bank.to_sysex()
