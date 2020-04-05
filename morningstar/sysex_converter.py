@@ -7,13 +7,6 @@ from morningstar.model import Bank, NUM_PRESETS
 from morningstar.utils import parse_bytes, parse_string
 
 
-def read_preset(preset, data_bytes):
-    preset.name = parse_string(data_bytes[-40:-32])
-    preset.toggle_name = parse_string(data_bytes[-32:-24])
-    preset.long_name = parse_string(data_bytes[-24:])
-    pass
-
-
 def process_file(input_filename):
     with open(input_filename, 'r') as input_file:
         bank = None
@@ -39,11 +32,11 @@ def process_file(input_filename):
                 name = parse_string(data_bytes[-24:])
                 bank = Bank(name)
             elif 4 <= count <= 3 + NUM_PRESETS:
-                read_preset(bank.presets[count - 4], data_bytes)
+                bank.presets[count - 4].from_sysex(data_bytes)
 
         return yaml.dump({
             "bank": bank.to_dict()
-        })
+        }, sort_keys=False, default_flow_style=False)
 
 
 if __name__ == "__main__":

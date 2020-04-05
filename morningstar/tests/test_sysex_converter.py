@@ -16,7 +16,7 @@ class TestSysexConverter(unittest.TestCase):
             for i, line in enumerate(expectation):
                 print("Checking line " + str(i + 1))
                 print("Expected : " + line[:-1])
-                print("Generated: " + actual[i][:-1])
+                print("Generated: " + actual[i])
                 self.assertEqual(actual[i], line.rstrip())
 
 

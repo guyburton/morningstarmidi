@@ -1,7 +1,6 @@
 #!/usr/bin/python
 import argparse
 import os
-from math import floor
 from typing import List
 
 import yaml
@@ -41,43 +40,6 @@ def parse_expression_message(message_type: str, default_channel: int, config) ->
     return message
 
 
-def parse_message(message_type: str, default_channel: int, config) -> Message:
-    message = Message()
-    config_value = config[message_type]
-    if message_type == 'control_change':
-        message.data1 = config_value.get('number') or 0
-        message.data2 = config_value.get('value') or 0
-    elif message_type in ['note_on', 'note_off']:
-        message.data1 = config_value.get('number') or 0
-        message.data2 = config_value.get('velocity') or 0
-    elif message_type == 'sysex':
-        message.data1 = config_value[0] if len(config_value) > 0 else 0
-        message.data2 = config_value[1] if len(config_value) > 1 else 0
-        message.data3 = config_value[2] if len(config_value) > 2 else 0
-    elif message_type == 'realtime':
-        message.data1 = ['nothing', 'start', 'stop', 'continue'].index(config_value)
-    elif message_type == 'midi_clock':
-        message.data1 = floor(config_value.get('bpm') / 100)
-        message.data2 = config_value.get('bpm') - (100 * message.data1)
-        message.data3 = 1 if config_value.get("tap_menu") else 0
-    elif message_type == 'midi_clock_tap':
-        pass
-    elif message_type == 'pc_scroll_up':
-        message.data1 = (config_value.get('slot') - 1) + 16 if config_value.get("increment") else 0
-        message.data2 = config_value.get('lower_limit') or 0
-        message.data3 = config_value.get('upper_limit') or 0
-        pass
-    else:
-        message.data1 = config.get(message_type)
-    if isinstance(config_value, dict) and config_value.get("channel"):
-        message.channel = config_value["channel"]
-    else:
-        message.channel = config.get("channel") or default_channel
-    message.toggle_mode = config.get("toggle_position") or 1
-    message.message_type = message_type
-    return message
-
-
 def convert_to_bank(bank_config):  # noqa: C901
     bank = Bank(bank_config.get("name"))
     presets_config = bank_config.get("presets")
@@ -103,12 +65,13 @@ def convert_to_bank(bank_config):  # noqa: C901
                         if action_type not in ACTIONS:
                             raise Exception("Unknown action type: " + action_type)
 
-                        action = Action(action_type)
+                        action = Action()
+                        action.action_type = action_type
                         preset.actions.append(action)
 
                         for message_type in MESSAGE_TYPES:
                             if message_type in action_config:
-                                message = parse_message(message_type, 1, action_config)
+                                message = Message().from_dict(message_type, action_config)
                                 action.messages.append(message)
 
                         messages_config = action_config.get("messages")
@@ -116,9 +79,10 @@ def convert_to_bank(bank_config):  # noqa: C901
                             for message_config in messages_config:
                                 for message_type in MESSAGE_TYPES:
                                     if message_type in message_config:
-                                        message = parse_message(message_type,
-                                                                action_config.get("channel") or 1,
+                                        message = Message().from_dict(message_type,
                                                                 message_config)
+                                        if action_config.get("channel"):
+                                            message.channel = action_config.get("channel")
                                         action.messages.append(message)
 
         for i in range(0, NUM_EXPR_PRESETS):

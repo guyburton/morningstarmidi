@@ -1,6 +1,7 @@
+from math import floor
 from typing import List
 
-from morningstar.utils import sysex_line, sysex_text
+from morningstar.utils import sysex_line, sysex_text, parse_string
 
 NUM_PRESETS = 12  # for MC 6
 NUM_EXPR_PRESETS = 2
@@ -55,8 +56,8 @@ EXPRESSION_TYPES = [
 
 class Action:
 
-    def __init__(self, action_type):
-        self.action_type = action_type
+    def __init__(self):
+        self.action_type = ACTIONS[0]
         self.messages = []
 
     def id(self):
@@ -64,8 +65,42 @@ class Action:
 
     def to_dict(self):
         return {
-            "type": self.action_type
+            "type": self.action_type,
+            "messages": [message.to_dict() for message in self.messages]
         }
+
+    def to_sysex(self):
+        for message in self.messages:
+            # this bit makes no sense but seems to work!?
+            if message.toggle_mode == "both":
+                action_byte = self.id() * 2 + 32
+            elif message.toggle_mode == 2:
+                action_byte = (self.id() * 2 + 1)
+            else:
+                action_byte = self.id() * 2
+
+            return [message.id(), message.data1, message.data2, message.data3, action_byte, message.channel - 1]
+
+    def from_sysex(self, data):
+        self.action_type = max(len(ACTIONS) - 1, data[4])
+        # self.toggle_mode = 0
+
+        message = Message()
+        if data[0] >= len(MESSAGE_TYPES):
+            raise Exception("byte 0 was too large for expected: " + str(data[0]) +
+                            " (message_type should be one of " + str(MESSAGE_TYPES) + ")")
+        message.data1 = data[1]
+        message.data2 = data[2]
+        message.data3 = data[3]
+        message.message_type = MESSAGE_TYPES[data[0]]
+        message.channel = data[5]
+
+        self.messages.append(message)
+
+        return self
+
+    def can_merge(self, new_action):
+        return self. action_type != new_action.action_type
 
 
 class Message:
@@ -82,6 +117,44 @@ class Message:
         return MESSAGE_TYPES.index(self.message_type) if self.message_type in MESSAGE_TYPES else \
             EXPRESSION_TYPES.index(self.message_type)
 
+    def to_dict(self):
+        return vars(self)
+    
+    def from_dict(self, message_type, config_dict):
+        config_value = config_dict.get(message_type)
+        self.toggle_mode = config_dict.get("toggle_position") or 1
+        self.message_type = message_type
+        if message_type == 'control_change':
+            self.data1 = config_value.get('number') or 0
+            self.data2 = config_value.get('value') or 0
+        elif message_type in ['note_on', 'note_off']:
+            self.data1 = config_value.get('number') or 0
+            self.data2 = config_value.get('velocity') or 0
+        elif message_type == 'sysex':
+            self.data1 = config_value[0] if len(config_value) > 0 else 0
+            self.data2 = config_value[1] if len(config_value) > 1 else 0
+            self.data3 = config_value[2] if len(config_value) > 2 else 0
+        elif message_type == 'realtime':
+            self.data1 = ['nothing', 'start', 'stop', 'continue'].index(config_value)
+        elif message_type == 'midi_clock':
+            self.data1 = floor(config_value.get('bpm') / 100)
+            self.data2 = config_value.get('bpm') - (100 * self.data1)
+            self.data3 = 1 if config_value.get("tap_menu") else 0
+        elif message_type == 'midi_clock_tap':
+            pass
+        elif message_type == 'pc_scroll_up':
+            self.data1 = (config_value.get('slot') - 1) + 16 if config_value.get("increment") else 0
+            self.data2 = config_value.get('lower_limit') or 0
+            self.data3 = config_value.get('upper_limit') or 0
+            pass
+        else:
+            self.data1 = config_value
+        if isinstance(config_value, dict) and config_value.get("channel"):
+            self.channel = config_value["channel"]
+        else:
+            self.channel = config_dict.get("channel") or 1
+        return self
+
 
 class Preset:
 
@@ -97,25 +170,13 @@ class Preset:
     def to_sysex(self) -> List[int]:
         data = [0x01, 0x07, 0x00, self.id, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
 
-        message_count = 0
         for action in self.actions:
-            for message in action.messages:
-                # this bit makes no sense but seems to work!?
-                if message.toggle_mode == "both":
-                    action_byte = action.id() * 2 + 32
-                elif message.toggle_mode == 2:
-                    action_byte = (action.id() * 2 + 1)
-                else:
-                    action_byte = action.id() * 2
+            data += action.to_sysex()
 
-                data += [message.id(), message.data1, message.data2, message.data3, action_byte, message.channel - 1]
-                message_count += 1
-
-        if message_count >= 16:
+        max_packet_size = 10 + 16 * 6
+        if len(data) >= max_packet_size:
             raise Exception("More than 16 messages specified for preset: " + str(self))
-
-        for i in range(message_count, 16):
-            data += [0, 0, 0, 0, 0, 0]
+        data += [0] * (max_packet_size - len(data))
 
         bit_field = 0
         if self.toggle_mode:
@@ -140,10 +201,30 @@ class Preset:
             "long_name": self.long_name,
             "toggle_mode": self.toggle_mode,
             "blink_mode": self.blink_mode,
-            "actions": [action.to_dict for action in self.actions]
+            "actions": [action.to_dict() for action in self.actions]
         }
 
         return data
+
+    def from_sysex(self, data_bytes):
+        self.name = parse_string(data_bytes[-40:-32])
+        self.toggle_name = parse_string(data_bytes[-32:-24])
+        self.long_name = parse_string(data_bytes[-24:])
+
+        offset = 14
+        action = Action()
+        for i in range(0, 16):
+            data = data_bytes[offset:offset + 6]
+            if data != [0, 0, 0, 0, 0, 0]:
+                new_action = Action().from_sysex(data)
+                if action.can_merge(new_action):
+                    action.messages += action.messages
+                else:
+                    action = new_action
+                if action not in self.actions:
+                    self.actions.append(action)
+            offset += 6
+        return self
 
 
 class ExpressionPreset:
@@ -158,19 +239,16 @@ class ExpressionPreset:
     def to_sysex(self) -> List[int]:
         data = [0x01, 0x08, 0x00, self.id, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
 
-        message_count = 0
         for message in self.messages:
             data += [message.id(), message.data1, message.data2, message.data3, 0, message.channel - 1]
-            message_count += 1
 
-        if message_count >= 16:
-            raise Exception("More than 16 messages specified for preset: " + str(self))
+        max_packet_size = 10 + 16 * 6
+        if len(data) >= max_packet_size:
+            raise Exception("More than 16 messages specified for expression preset: " + str(self))
 
-        for i in range(message_count, 16):
-            data += [0, 0, 0, 0, 0, 0]
+        data += [0] * (max_packet_size - len(data))
 
         data += [0, 0]
-
         data += sysex_text(self.name, 8)
         data += sysex_text(self.toggle_name, 8)
         data += sysex_text(self.long_name, 24)
@@ -181,7 +259,7 @@ class ExpressionPreset:
             "name": self.name,
             "toggle_name": self.toggle_name,
             "long_name": self.long_name,
-            "actions": []
+            "messages": [message.to_dict() for message in self.messages]
         }
         return data
 
