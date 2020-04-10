@@ -1,3 +1,4 @@
+import argparse
 import time
 
 import mido
@@ -8,7 +9,7 @@ This is a network server which will forward sysex messages from a TCP socket to 
 """
 
 
-def main(device_name, port=8081):
+def main(device_name, port):
     port_names = mido.get_output_names()
     print("Available ports: " + ", ".join(port_names))
 
@@ -53,7 +54,11 @@ def main(device_name, port=8081):
                     time.sleep(1)
 
 
-
 if __name__ == "__main__":
-    import sys
-    main(sys.argv[1] if len(sys.argv) > 1 else None)
+    parser = argparse.ArgumentParser(description='Start network server to proxy MIDI to another device')
+    parser.add_argument('port', type=int, help='TCP port number')
+    parser.add_argument('-d', '--midi-device', dest='device', type=str, default=None,
+                        help='alternate midi device name '
+                             '(default is "Morningstar MC6MK2" or any solitary connected device)')
+    args = vars(parser.parse_args())
+    main(args["device"], args["port"])

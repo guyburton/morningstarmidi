@@ -1,3 +1,4 @@
+import argparse
 import time
 
 import mido
@@ -24,9 +25,10 @@ def main(hostname='localhost', port=8081):
         print("Created virtual port '" + device_name + "'")
         while True:
             try:
+                print("Connecting to " + hostname + ":" + str(port))
                 with connect(hostname, port) as client:
                     client_port = client
-                    print('Connected to proxy server on port ' + str(port))
+                    print('Connected to proxy server')
                     for message in client:
                         print("Proxying message from MC6: " + str(message))
                         virtual_port.send(message)
@@ -37,4 +39,10 @@ def main(hostname='localhost', port=8081):
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description='Start virtual midi port proxying commands to network')
+    parser.add_argument('hostname', type=str, default='localhost',
+                        help='hostname to connect to')
+    parser.add_argument('port', type=int, default=8081,
+                        help='TCP port number to connect to')
+    args = vars(parser.parse_args())
+    main(args["hostname"], args["port"])
