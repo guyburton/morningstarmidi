@@ -39,7 +39,7 @@ def main(device_name, port):
             print("No network clients connected for " + str(message))
 
     with mido.open_ioport(device_name, callback=device_message) as device:
-        with PortServer('localhost', port) as server:
+        with PortServer('0.0.0.0', port) as server:
             print("Listening on port " + str(port))
             while True:
                 try:
