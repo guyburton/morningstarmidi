@@ -243,4 +243,16 @@ Default all values to 0
 `F0 00 21 24 00 00 00 7F 00 00 00 00 00 00 0A F7`  Acknowledge (0 127)
 
 
+# MIDI Network Proxy
+
+Also included are two python programs for proxying MIDI messages over a network.
+I run this on a Raspberry Pi Zero wirelessly in a way which the Morningstar programmer recognises.
+
+On the device which the MC6 is connected: 
+
+`python -m morningstar.proxy.server 3000`
+
+On the machine which you want a new virtual MC6 port:
+
+`python -m morningstar.proxy.virtualport yourhost 3000`
 
