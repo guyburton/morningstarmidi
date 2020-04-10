@@ -28,24 +28,29 @@ def main(device_name, port=8081):
     if not device_name:
         print("Found multiple ports but none matching default name. Please specify which port name to forward to.")
 
-    with mido.open_ioport(device_name) as device:
+    client = None
+
+    def device_message(message):
+        if client:
+            print("Proxying message from device to network: " + str(message))
+            client.send(message)
+        else:
+            print("No network clients connected for " + str(message))
+
+    with mido.open_ioport(device_name, callback=device_message) as device:
         with PortServer('localhost', port) as server:
             print("Listening on port " + str(port))
             while True:
                 try:
                     client = server.accept()
                     print('Accepted connection from ' + str(client))
-                    while True:
-                        for message in client.iter_pending():
-                            print("Proxying message from network to device: " + str(message))
-                            device.send(message)
-                        for message in device.iter_pending():
-                            print("Proxying message from device to network: " + str(message))
-                            client.send(message)
-                    time.sleep(0)
+                    for message in client:
+                        print("Proxying message from network to device: " + str(message))
+                        device.send(message)
                 except Exception as e:
+                    client = None
                     print("Caught exception: " + str(e))
-                    time.sleep(0)
+                    time.sleep(1)
 
 
 
