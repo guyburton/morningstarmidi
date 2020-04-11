@@ -38,20 +38,20 @@ def main(device_name, port):
         else:
             print("No network clients connected for " + str(message))
 
-    with mido.open_ioport(device_name, callback=device_message) as device:
-        with PortServer('0.0.0.0', port) as server:
-            print("Listening on port " + str(port))
-            while True:
-                try:
-                    client = server.accept()
-                    print('Accepted connection from ' + str(client))
+    with PortServer('0.0.0.0', port) as server:
+        print("Listening on port " + str(port))
+        while True:
+            try:
+                client = server.accept()
+                print('Accepted connection from ' + str(client))
+                with mido.open_ioport(device_name, callback=device_message) as device:
                     for message in client:
                         print("Proxying message from network to device: " + str(message))
                         device.send(message)
-                except Exception as e:
-                    client = None
-                    print("Caught exception: " + str(e))
-                    time.sleep(1)
+            except Exception as e:
+                client = None
+                print("Caught exception: " + str(e))
+                time.sleep(1)
 
 
 if __name__ == "__main__":
