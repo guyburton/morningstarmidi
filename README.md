@@ -220,7 +220,7 @@ Default all values to 0
 
 `F0 00 21 24 00 00 00 17 00 00 00 00 00 00 62 F7`  Paste Expression Preset (0 23)
 
-`F0 00 21 24 00 00 00 20 00 00 00 00 00 00 55 F7`  Toggle Editor Mode (0 32)
+`F0 00 21 24 00 00 00 20 00 00 00 00 00 00 55 F7`  Toggle Editor Mode (0 32) Button presses on the device will cause sysex dumps of the bank
 
 `F0 00 21 24 00 00 00 21 00 00 00 00 00 00 54 F7`  Toggle Page (0 33)
 
@@ -238,9 +238,9 @@ Default all values to 0
 
 `F0 00 21 24 00 00 03 00 01 03 00 00 00 00 74 F7`
 
-`F0 00 21 24 00 00 00 7D 00 00 00 00 00 00 08 F7`  Ping (0 125)
+`F0 00 21 24 00 00 00 7D 00 00 00 00 00 00 08 F7`  Ping (0 125) In editor mode you will receive the following response `F0 00 21 24 03 03 00 7D 01 00 00 00 00 00 09 F7`
 
-`F0 00 21 24 00 00 00 7F 00 00 00 00 00 00 0A F7`  Acknowledge (0 127)
+`F0 00 21 24 00 00 00 7F 00 00 00 00 00 00 0A F7`  Acknowledge (0 127) 
 
 
 # MIDI Network Proxy
