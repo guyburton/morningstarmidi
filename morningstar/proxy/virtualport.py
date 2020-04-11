@@ -1,4 +1,5 @@
 import argparse
+import sys
 import time
 
 import mido
@@ -32,6 +33,8 @@ def main(hostname='localhost', port=8081):
                     for message in client:
                         print("Proxying message from MC6: " + str(message))
                         virtual_port.send(message)
+            except KeyboardInterrupt:
+                sys.exit(0)
             except Exception as e:
                 client_port = None
                 print("Caught exception: " + str(e))

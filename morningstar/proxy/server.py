@@ -1,4 +1,5 @@
 import argparse
+import sys
 import time
 
 import mido
@@ -48,6 +49,8 @@ def main(device_name, port):
                     for message in client:
                         print("Proxying message from network to device: " + str(message))
                         device.send(message)
+            except KeyboardInterrupt:
+                sys.exit(0)
             except Exception as e:
                 client = None
                 print("Caught exception: " + str(e))
